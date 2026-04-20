@@ -10,22 +10,40 @@ class ConvertInputs(Node):
         super().__init__('convert_inputs')
         self.publisher = self.create_publisher(Controller, 'controller_topic', 10)
         self.ui_subscription = self.create_subscription(
-            UI, '/controls', self.ui_callback, 10
+            UI, '/controls', self.ui_input_callback, 10
         )
         self.joy_subscription = self.create_subscription(
-            Joy, '/joy', self.joy_callback, 10
+            Joy, '/joy', self.joy_input_callback, 10
         )
         self.total_cameras = TOTAL_CAMERAS
         self.camera_index = 0
         self.prev_lb = 0
         self.prev_rb = 0
+        self.joystick_mode = 0
+        self.prev_back = 0
 
-    def joy_callback(self, msg: Joy):
+        self.default_speed = 0.5
+
+    def joy_input_callback(self, msg: Joy):
         left_y  = msg.axes[1]
         right_y = msg.axes[3]
         rt      = msg.axes[5]
         lb      = msg.buttons[4]
         rb      = msg.buttons[5]
+
+        a_button = msg.buttons[1]
+        b_button = msg.buttons[2]
+        x_button = msg.buttons[3]
+        y_button = msg.buttons[4]
+
+        back_button = msg.buttons[8]
+        start_button = msg.buttons[9]
+
+        out = Controller()
+
+        # ------------------------------
+        #           BUMPERS
+        # ------------------------------
 
         if rb == 1 and self.prev_rb == 0:
             self.camera_index += 1
@@ -39,33 +57,53 @@ class ConvertInputs(Node):
         elif (self.camera_index < 0):
             self.camera_index = self.total_cameras - 1
 
-        out = Controller()
-        out.joystick_mode = True
-        out.drive_left    = left_y
-        out.drive_right   = right_y
+        out.camera_num = self.camera_index
+
+        # ------------------------------
+        #           TRIGGERS
+        # ------------------------------
+
         out.end_effector  = rt
-        out.camera_num    = self.camera_index
+
+        # ------------------------------
+        #          BACK BUTTON
+        # ------------------------------
+
+        if back_button == 1 and self.prev_back == 0:
+            self.joystick_mode = not self.joystick_mode
+        self.prev_back = back_button
+
+        out.joystick_mode = self.joystick_mode
+
+        # ------------------------------
+        #           JOYSTICKS
+        # ------------------------------
+
+        if (self.joystick_mode == 0):
+            out.drive_left = left_y
+            out.drive_right = right_y
+
+
+        
         self.publisher.publish(out)
 
-    def ui_callback(self, msg: UI):
-        default_speed = 0.5
+    def ui_input_callback(self, msg: UI):
         out = Controller()
-        out.joystick_mode = False
 
         if msg.drivetrain_fwd:
-            out.drive_left  =  default_speed
-            out.drive_right =  default_speed
+            out.drive_left  =  self.default_speed
+            out.drive_right =  self.default_speed
         elif msg.drivetrain_rev:
-            out.drive_left  = -default_speed  # fix: was positive before
-            out.drive_right = -default_speed
+            out.drive_left  = -self.default_speed
+            out.drive_right = -self.default_speed
         elif msg.drivetrain_left:
             out.drive_left  =  0.0
-            out.drive_right =  default_speed
+            out.drive_right =  self.default_speed
         elif msg.drivetrain_right:
-            out.drive_left  =  default_speed
+            out.drive_left  =  self.default_speed
             out.drive_right =  0.0
 
-        self.publisher.publish(out)  # fix: was missing
+        self.publisher.publish(out)
 
 def main(args=None):
     rclpy.init(args=args)
