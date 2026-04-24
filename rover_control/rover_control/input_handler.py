@@ -114,6 +114,17 @@ class ConvertInputs(Node):
             out.drive_left  =  self.default_speed
             out.drive_right =  0.0
 
+        # TEMPORARY: Buttons on the UI meant to controll the arm will instead be for the camera mount
+
+        if msg.arm_left:
+            out.camera_left_right  =  -1.0
+        elif msg.drivetrain_rev:
+            out.camera_left_right  =  1.0
+        elif msg.drivetrain_left:
+            out.camera_up_down  =  1.0
+        elif msg.drivetrain_right:
+            out.camera_up_down  =  -1.0
+
         self.publisher.publish(out)
 
 def main(args=None):
