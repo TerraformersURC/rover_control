@@ -27,9 +27,13 @@ class ConvertInputs(Node):
     def joy_input_callback(self, msg: Joy):
         left_y  = msg.axes[1]
         right_y = msg.axes[3]
-        rt      = msg.axes[5]
         lb      = msg.buttons[4]
         rb      = msg.buttons[5]
+
+        dpad_x = msg.axes[4]
+        dpad_y = msg.axes[5]
+
+        rt = msg.buttons[8]
 
         a_button = msg.buttons[1]
         b_button = msg.buttons[2]
@@ -82,6 +86,13 @@ class ConvertInputs(Node):
         if (self.joystick_mode == 0):
             out.drive_left = left_y
             out.drive_right = right_y
+
+        # ------------------------------
+        #             D PAD
+        # ------------------------------
+
+        out.camera_left_right = dpad_x
+        out.camera_up_down = dpad_y
 
 
         
