@@ -35,13 +35,13 @@ class ConvertInputs(Node):
 
         rt = msg.buttons[8]
 
+        x_button = msg.buttons[0]
         a_button = msg.buttons[1]
         b_button = msg.buttons[2]
-        x_button = msg.buttons[3]
-        y_button = msg.buttons[4]
+        y_button = msg.buttons[3]
 
-        back_button = msg.buttons[8]
-        start_button = msg.buttons[9]
+        back_button = msg.buttons[9]
+        start_button = msg.buttons[10]
 
         out = Controller()
 
@@ -118,11 +118,11 @@ class ConvertInputs(Node):
 
         if msg.arm_left:
             out.camera_left_right  =  -1.0
-        elif msg.drivetrain_rev:
+        elif msg.arm_right:
             out.camera_left_right  =  1.0
-        elif msg.drivetrain_left:
+        elif msg.arm_up:
             out.camera_up_down  =  1.0
-        elif msg.drivetrain_right:
+        elif msg.arm_down:
             out.camera_up_down  =  -1.0
 
         self.publisher.publish(out)
