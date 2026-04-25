@@ -44,6 +44,8 @@ class ConvertInputs(Node):
         start_button = msg.buttons[10]
 
         out = Controller()
+        out.axes = msg.axes
+        out.buttons = msg.buttons
 
         # ------------------------------
         #           BUMPERS
