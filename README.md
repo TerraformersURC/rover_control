@@ -46,4 +46,4 @@ The joy node is necessary to turn controller inputs into a ROS topic. The input 
 
 ## Important Notes
 
-- Put important notes here!
+- The controller with the blue tape on it is the good one
