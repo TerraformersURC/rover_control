@@ -6,7 +6,7 @@ from rover_control.controller_bindings import BINDINGS
 
 TOTAL_CONTROL_MODES = 3     # drivetrain & camera, arm, science
 TOTAL_CAMERAS = 2           # The number of cameras that we want to be able to switch between
-PUBLISH_RATE = 20.0         # Controller messages published per second
+PUBLISH_RATE = 10.0         # Controller messages published per second
 CONTROLLER = 2              # Which controller profile to use (1 or 2, see controller_bindings.py)
 ARM_XYZ_SCALE = 0.03
 ARM_RPY_SCALE = 0.1
@@ -37,11 +37,12 @@ DRIVE_SLEW_RATE = 0.75      # max change in output per second, in full-throttle 
 DRILL_MAX_SPEED = 255       # magnitude sent to the Arduino, 0-255
 SCREW_MAX_SPEED = 255
 SCIENCE_DEADZONE = 0.15     # sticks rest near zero but rarely exactly zero
-STEPS_PER_REV = 200         # must match STEPS_PER_REV in trfm_arduino_26_combined.ino
-STEPS_PER_PRESS = 1         # turntable steps advanced per d-pad press.
+#STEPS_PER_REV = 200         # must match STEPS_PER_REV in trfm_arduino_26_combined.ino
+#STEPS_PER_PRESS = 1         # turntable steps advanced per d-pad press.
                             # This is the knob for turntable feel: 1 step is
                             # 1.8 degrees, 50 would reproduce the old 90 degree
                             # cells. Sender-side only, no reflash to change.
+TURNTABLE_CELLS = 4         # Stepper motor is handled by arduino, just track current cell
 
 class ConvertInputs(Node):
     def __init__(self):
@@ -324,9 +325,9 @@ class ConvertInputs(Node):
         # path to whatever position it is given.
         dpad_x = msg.axes[self.axes['dpad_x']]
         if dpad_x > 0.5 and self.prev_dpad_x <= 0.5:
-            self.turntable_step = (self.turntable_step + STEPS_PER_PRESS) % STEPS_PER_REV
+            self.turntable_step = (self.turntable_step + 1) % TURNTABLE_CELLS
         elif dpad_x < -0.5 and self.prev_dpad_x >= -0.5:
-            self.turntable_step = (self.turntable_step - STEPS_PER_PRESS) % STEPS_PER_REV
+            self.turntable_step = (self.turntable_step - 1) % TURNTABLE_CELLS
         self.prev_dpad_x = dpad_x
 
         return out
